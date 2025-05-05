@@ -1,3 +1,4 @@
+
 import streamlit as st
 import requests
 
@@ -37,3 +38,4 @@ if st.button("Run AutoML"):
             st.error("An error occurred while running AutoML.")
     else:
         st.warning("Please upload a dataset and select at least one algorithm.")
+

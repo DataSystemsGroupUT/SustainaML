@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -9,36 +10,27 @@ import plotly.graph_objects as go
 # Set page configuration
 st.set_page_config(page_title="SustainaML AutoML", layout="wide")
 st.title("SustainaML AutoML")
-
 # Sidebar: Dataset upload
 st.sidebar.header("Dataset Configuration")
 uploaded_file = st.sidebar.file_uploader("Upload CSV file", type="csv")
 # Add a button to show dataset insights
 if "show_dataset_insights" not in st.session_state:
     st.session_state["show_dataset_insights"] = False
-
 if st.sidebar.button(" Dataset Insights"):
     st.session_state["show_dataset_insights"] = not st.session_state["show_dataset_insights"]
-
 # Display Dataset Insights only if the button is clicked
 if st.session_state["show_dataset_insights"] and uploaded_file:
     df = pd.read_csv(uploaded_file)
-
-    #st.subheader("Dataset Insights")
-
     # Show dataset preview
     st.write("### Data Preview")
     st.dataframe(df.head())
-
     # Show dataset summary statistics
     summary_stats = df.describe().drop('count').rename(index={
         "25%": "Q1 (25th percentile)",
         "50%": "Median (50th percentile)",
         "75%": "Q3 (75th percentile)"
-    })
-    
+    }) 
     st.write("### Summary Statistics")
-
     # Create a styled table for summary statistics
     styled_stats = summary_stats.style.set_table_styles([
         # Style header cells in the table head
@@ -50,7 +42,6 @@ if st.session_state["show_dataset_insights"] and uploaded_file:
     ])
     # Render the styled table as HTML
     st.markdown(styled_stats.to_html(), unsafe_allow_html=True)
-
     # Show missing values
     st.write("### Missing Values")
     missing_values = df.isnull().sum()
@@ -60,7 +51,6 @@ if st.session_state["show_dataset_insights"] and uploaded_file:
         st.write("No missing values in the dataset.")
     # # Get numeric columns
     numeric_columns = df.select_dtypes(include=["number"]).columns.tolist()
-
     # Show correlation heatmap
     if len(numeric_columns) > 1:
         st.write("### Correlation Heatmap")
@@ -76,6 +66,7 @@ if st.session_state["show_dataset_insights"] and uploaded_file:
         st.pyplot(plt)
     else:
         st.write("Not enough numeric features for a correlation heatmap.")
+st.sidebar.header("AutoML Settings")
 # Sidebar: Framework and algorithm selection
 with st.sidebar.expander("Select Frameworks and Algorithms"):
     frameworks = ["FLAML", "H2O", "MLJAR"]
@@ -84,32 +75,32 @@ with st.sidebar.expander("Select Frameworks and Algorithms"):
     algorithm_selection = {}
     default_hyperparams = { # Default hyperparameters for all algorithms
         "FLAML": {
-            "Random Forest": {"n_estimators": 100, "max_depth": 6, "min_samples_split": 2, "min_samples_leaf": 1},
+            "RF": {"n_estimators": 100, "max_depth": 6, "min_samples_split": 2, "min_samples_leaf": 1},
             "XGBoost": {"learning_rate": 0.1, "n_estimators": 100, "max_depth": 6, "subsample": 1.0, "colsample_bytree": 1.0},
             "LightGBM": {"num_leaves": 31, "learning_rate": 0.1, "n_estimators": 100, "min_data_in_leaf": 20},
             "Extra Trees": {"n_estimators": 100, "max_depth": 6, "min_samples_split": 2, "min_samples_leaf": 1},
            # "CatBoost": {"iterations": 500, "learning_rate": 0.03, "depth": 6},
-            "K-Nearest Neighbors": {"n_neighbors": 5, "weights": 'uniform'}, #"algorithm": 'auto'
+            "KNN": {"n_neighbors": 5, "weights": 'uniform'}, #"algorithm": 'auto'
             "Logistic Regression": {"penalty": 'l2', "C": 1.0}, # , "solver": 'lbfgs'
         },
         "H2O": {
             "GLM": {"alpha": 0.5, "lambda": 0.1},
             "GBM": {"n_estimators": 100, "learning_rate": 0.05, "max_depth": 6},
             "Naive Bayes": {"var_smoothing": 1e-9},
-            "Distributed Random Forest": {"n_estimators": 200, "max_depth": 6, "min_samples_split": 2, "min_samples_leaf": 1},
+            "Distributed RF": {"n_estimators": 200, "max_depth": 6, "min_samples_split": 2, "min_samples_leaf": 1},
             "XGBoost": {"learning_rate": 0.1, "n_estimators": 100, "max_depth": 6, "subsample": 1.0,
                         "colsample_bytree": 1.0},
         },
         "MLJAR": {
             "Baseline": {"penalty": 'l2', "C": 1.0}, #, "solver": 'lbfgs'
             "Decision Tree": {"max_depth": 3, "min_samples_split": 2, "min_samples_leaf": 1},
-            "Random Forest": {"n_estimators": 100, "max_depth": 6, "min_samples_split": 2, "min_samples_leaf": 1},
+            "RF": {"n_estimators": 100, "max_depth": 6, "min_samples_split": 2, "min_samples_leaf": 1},
             "XGBoost": {"learning_rate": 0.1, "n_estimators": 100, "max_depth": 6, "subsample": 1.0, "colsample_bytree": 1.0},
             "Neural Network": {"kernel": 'linear', "C": 1.0}, #
             "Extra Trees": {"n_estimators": 100, "max_depth": 6, "min_samples_split": 2, "min_samples_leaf": 1},
             "LightGBM": {"num_leaves": 31, "learning_rate": 0.1, "n_estimators": 100, "min_data_in_leaf": 20},
-            "Support Vector Machines": { "kernel": 'rbf', "C": 1.0}, #
-            "K-Nearest Neighbors": {"n_neighbors": 5, "weights": 'uniform'}, #, "algorithm": 'auto'
+            "SVM": { "kernel": 'rbf', "C": 1.0}, #
+            "KNN": {"n_neighbors": 5, "weights": 'uniform'}, #, "algorithm": 'auto'
         }
     }
     # Algorithm Selection UI
@@ -119,15 +110,13 @@ with st.sidebar.expander("Select Frameworks and Algorithms"):
 
         for algo in default_hyperparams[framework].keys():
             algorithm_selection[framework][algo] = st.checkbox(algo, value=True, key=f"{framework}_{algo}")
-
-# Step 1: Add a button to modify hyperparameters
+# Add a button to modify hyperparameters
 if st.sidebar.button("Modify Hyperparameters"):
     if not selected_frameworks or not any(any(val for val in algo.values()) for algo in algorithm_selection.values()):
         st.sidebar.warning("Please select at least one framework and algorithm.")
     else:
         st.session_state["show_dataset_insights"] = False
         st.session_state["show_hyperparam_ui"] = True
-####################
 # Time Budget Dropdown in Sidebar
 st.sidebar.markdown("---")
 st.sidebar.subheader("⏱️ Choose Time Budget")
@@ -149,26 +138,21 @@ selected_label = st.sidebar.selectbox(
     index=list(time_options.keys()).index(st.session_state.selected_time_budget)
 )
 st.session_state.selected_time_budget = selected_label
-st.session_state.time_budget = time_options[selected_label]
-####################   
+st.session_state.time_budget = time_options[selected_label]  
     # Ensure "Dataset Insights" is hidden when modifying hyperparameters
 if st.session_state.get("show_hyperparam_ui", False):
     st.session_state["show_dataset_insights"] = False
-
-# Step 2: Show Hyperparameter Modification UI
+# Show Hyperparameter Modification UI
 if "show_hyperparam_ui" in st.session_state and st.session_state["show_hyperparam_ui"]:
     st.subheader("Modify Hyperparameters")
-
     modified_hyperparams = {}
     for framework in selected_frameworks:
         st.write(f"**{framework} Algorithms**")
         modified_hyperparams[framework] = {}
-
         for algo, selected in algorithm_selection[framework].items():
             if selected:
                 st.write(f"**{algo} Hyperparameters:**")
                 hyperparams = default_hyperparams[framework].get(algo, {})
-
                 modified_hyperparams[framework][algo] = {}
                 for param, default_value in hyperparams.items():
                     unique_key = f"{framework}_{algo}_{param}"  # Unique key for each UI element
@@ -187,12 +171,10 @@ if "show_hyperparam_ui" in st.session_state and st.session_state["show_hyperpara
                         )
                     else:
                         st.warning(f"Skipping unsupported parameter: {param} (type: {type(default_value)})")
-
     if st.button("Confirm Hyperparameters"):
         st.session_state["modified_hyperparams"] = modified_hyperparams
         st.session_state["show_hyperparam_ui"] = False
         st.success("Hyperparameters updated! You can now run AutoML.")
-
 # Persistent state for DataFrame and valid metrics
 if "df_metrics" not in st.session_state:
     st.session_state.df_metrics = None
@@ -209,8 +191,6 @@ if 'show_dataset_insights' in st.session_state:
     st.session_state['show_dataset_insights'] = False
 if 'show_hyperparam_ui' in st.session_state:
     st.session_state['show_hyperparam_ui'] = False
-
-
 # Run AutoML Button / step 3
 if st.sidebar.button("Run AutoML"):
     if uploaded_file:
@@ -229,9 +209,7 @@ if st.sidebar.button("Run AutoML"):
         }
 
         response = requests.post("http://127.0.0.1:5000/run_automl", json=payload)
-
         if response.status_code == 200:
-
             results = response.json().get("results", {})
             st.session_state["automl_results"] = results  # Store results for feature importance
             # Store comparison by time budget
@@ -243,7 +221,6 @@ if st.sidebar.button("Run AutoML"):
 
             if "time_budget_comparisons" not in st.session_state:
                 st.session_state["time_budget_comparisons"] = []
-
             st.session_state["time_budget_comparisons"].append(comparison_entry)
             if not results:
                 st.error("No results were generated. Please check the backend logs for details.")
@@ -259,7 +236,6 @@ if st.sidebar.button("Run AutoML"):
                             metrics["CO2 Emission"] = round(metrics["CO2 Emission"], 10)
                         row.update(metrics)
                         metrics_data.append(row)
-
                 # Update session state
                 if metrics_data:
                     st.session_state.df_metrics = pd.DataFrame(metrics_data)
@@ -269,16 +245,13 @@ if st.sidebar.button("Run AutoML"):
                     ]
 
                     st.success("AutoML run completed successfully!")
-
         else:
             st.error(f"Error running AutoML: {response.json().get('message', 'Unknown error')}")
-
     #  Ensure session state is initialized
     if "show_feature_importance" not in st.session_state:
         st.session_state["show_feature_importance"] = False
     if "automl_results" not in st.session_state:
         st.session_state["automl_results"] = {}
-
 #  Sidebar: Feature Importance Button (Always Visible)
 st.sidebar.markdown("---")
 st.sidebar.subheader("Analysis Tool")
@@ -288,13 +261,11 @@ if st.sidebar.button("Model Leaderboard"):
     st.session_state["show_feature_importance"] = False
     st.session_state["show_pipeline_analysis"] = False
     st.session_state["show_comparison"] = False
-
     if "automl_results" in st.session_state and st.session_state["automl_results"]:
         st.session_state["show_automl_results"] = True
     else:
         st.warning("Please run AutoML first.")
         st.rerun()
-
 if st.sidebar.button("Feature Importance"):
     if not st.session_state.get("automl_results"):
         st.sidebar.warning("⚠️ Please run AutoML first before viewing feature importance.")
@@ -304,8 +275,6 @@ if st.sidebar.button("Feature Importance"):
         st.session_state["show_pipeline_analysis"] = False  # Ensure only one view is active
         st.rerun()  #  Force UI refresh to apply changes immediately
 #  Pipeline Analysis Toggle
-#if "show_pipeline_analysis" not in st.session_state:
-#    st.session_state["show_pipeline_analysis"] = False
 if st.sidebar.button("Hyperparameter Analysis"):
     st.session_state["show_hyperimpact_analysis"] = True
     st.session_state["show_pipeline_analysis"] = False
@@ -317,7 +286,6 @@ if st.sidebar.button("Time Budgets Comparison"):
     st.session_state["show_feature_importance"] = False
     st.session_state["show_pipeline_analysis"] = False
     st.session_state["show_automl_results"] = False
-
 if st.sidebar.button("Process Overview"):
     if not st.session_state.get("automl_results"):
         st.sidebar.warning("⚠️ Please run AutoML first before viewing pipeline analysis.")
@@ -326,67 +294,177 @@ if st.sidebar.button("Process Overview"):
         st.session_state["show_automl_results"] = False
         st.session_state["show_feature_importance"] = False  # Ensure only one view is active
         st.rerun()
-####################################################
-# 🚀 Show either the Main UI or Feature Importance (NEVER both)
-# ✅ Always initialize df_metrics at the start to prevent NameError
+color_map = {
+    "FLAML_RF": "blue",
+    "FLAML_XGBoost": "red",
+    "FLAML_LightGBM": "green",
+    "FLAML_Extra Trees": "yellow",
+    "FLAML_KNN": "purple",
+    "FLAML_Logistic Regression": "orange",
+    "H2O_Naive Bayes": "gray",
+    "H2O_GBM": "black",
+    "H2O_GLM": "pink",
+    "H2O_Distributed RF": "cyan",
+    "H2O_XGBoost": "magenta",
+    "MLJAR_Baseline": "lime",
+    "MLJAR_Decision Tree": "olive",
+    "MLJAR_RF": "teal",
+    "MLJAR_XGBoost": "maroon",
+    "MLJAR_Neural Network": "navy",
+    "MLJAR_Extra Trees": "silver",
+    "MLJAR_LightGBM": "gold",
+    "MLJAR_SVM": "beige",
+    "MLJAR_KNN": "brown",
+}
+# Updated color_map to include both time budget and algorithm combinations
+color_map_time_budget = {
+    "10 seconds_FLAML_RF": "blue",
+    "30 seconds_FLAML_RF": "blue",
+    "60 seconds_FLAML_RF": "blue",
+    "120 seconds_FLAML_RF": "blue",
+    "10 seconds_FLAML_XGBoost": "red",
+    "30 seconds_FLAML_XGBoost": "red",
+    "60 seconds_FLAML_XGBoost": "red",
+    "120 seconds_FLAML_XGBoost": "red",
+    "10 seconds_FLAML_LightGBM": "green",
+    "30 seconds_FLAML_LightGBM": "green",
+    "60 seconds_FLAML_LightGBM": "green",
+    "120 seconds_FLAML_LightGBM": "green",
+    "10 seconds_FLAML_Extra Trees": "yellow",
+    "30 seconds_FLAML_Extra Trees": "yellow",
+    "60 seconds_FLAML_Extra Trees": "yellow",
+    "120 seconds_FLAML_Extra Trees": "yellow",
+    "10 seconds_FLAML_KNN": "purple",
+    "30 seconds_FLAML_KNN": "purple",
+    "60 seconds_FLAML_KNN": "purple",
+    "120 seconds_FLAML_KNN": "purple",
+    "10 seconds_FLAML_Logistic Regression": "orange",
+    "30 seconds_FLAML_Logistic Regression": "orange",
+    "60 seconds_FLAML_Logistic Regression": "orange",
+    "120 seconds_FLAML_Logistic Regression": "orange",
+    "10 seconds_H2O_Naive Bayes": "gray",
+    "30 seconds_H2O_Naive Bayes": "gray",
+    "60 seconds_H2O_Naive Bayes": "gray",
+    "120 seconds_H2O_Naive Bayes": "gray",
+    "10 seconds_H2O_GBM": "black",
+    "30 seconds_H2O_GBM": "black",
+    "60 seconds_H2O_GBM": "black",
+    "120 seconds_H2O_GBM": "black",
+    "10 seconds_H2O_GLM": "pink",
+    "30 seconds_H2O_GLM": "pink",
+    "60 seconds_H2O_GLM": "pink",
+    "120 seconds_H2O_GLM": "pink",
+    "10 seconds_H2O_Distributed RF": "cyan",
+    "30 seconds_H2O_Distributed RF": "cyan",
+    "60 seconds_H2O_Distributed RF": "cyan",
+    "120 seconds_H2O_Distributed RF": "cyan",
+    "10 seconds_H2O_XGBoost": "magenta",
+    "30 seconds_H2O_XGBoost": "magenta",
+    "60 seconds_H2O_XGBoost": "magenta",
+    "120 seconds_H2O_XGBoost": "magenta",
+    "10 seconds_MLJAR_Baseline": "lime",
+    "10 seconds_MLJAR_Decision Tree": "olive",
+    "10 seconds_MLJAR_RF": "teal",
+    "10 seconds_MLJAR_XGBoost": "maroon",
+    "10 seconds_MLJAR_Neural Network": "navy",
+    "10 seconds_MLJAR_Extra Trees": "silver",
+    "10 seconds_MLJAR_LightGBM": "gold",
+    "10 seconds_MLJAR_SVM": "beige",
+    "10 seconds_MLJAR_KNN": "brown",
+    "30 seconds_MLJAR_Baseline": "lime",
+    "30 seconds_MLJAR_Decision Tree": "olive",
+    "30 seconds_MLJAR_RF": "teal",
+    "30 seconds_MLJAR_XGBoost": "maroon",
+    "30 seconds_MLJAR_Neural Network": "navy",
+    "30 seconds_MLJAR_Extra Trees": "silver",
+    "30 seconds_MLJAR_LightGBM": "gold",
+    "30 seconds_MLJAR_SVM": "beige",
+    "30 seconds_MLJAR_KNN": "brown",
+    "60 seconds_MLJAR_Baseline": "lime",
+    "60 seconds_MLJAR_Decision Tree": "olive",
+    "60 seconds_MLJAR_RF": "teal",
+    "60 seconds_MLJAR_XGBoost": "maroon",
+    "60 seconds_MLJAR_Neural Network": "navy",
+    "60 seconds_MLJAR_Extra Trees": "silver",
+    "60 seconds_MLJAR_LightGBM": "gold",
+    "60 seconds_MLJAR_SVM": "beige",
+    "60 seconds_MLJAR_KNN": "brown",
+    "120 seconds_MLJAR_Baseline": "lime",
+    "120 seconds_MLJAR_Decision Tree": "olive",
+    "120 seconds_MLJAR_RF": "teal",
+    "120 seconds_MLJAR_XGBoost": "maroon",
+    "120 seconds_MLJAR_Neural Network": "navy",
+    "120 seconds_MLJAR_Extra Trees": "silver",
+    "120 seconds_MLJAR_LightGBM": "gold",
+    "120 seconds_MLJAR_SVM": "beige",
+    "120 seconds_MLJAR_KNN": "brown",   
+}
+#  Always initialize df_metrics at the start to prevent NameError
 df_metrics = st.session_state.df_metrics if "df_metrics" in st.session_state else None
-
 if st.session_state.get("show_automl_results", False):
     valid_metrics = st.session_state.valid_metrics if st.session_state.valid_metrics else ["No Metrics Available"]
-    # Algorithm Metrics Section
     st.subheader("Algorithm Metrics")
-
     if df_metrics is not None and not df_metrics.empty:
         available_frameworks = list(set(algo.split("_")[0] for algo in df_metrics["Algorithm"]))
         selected_frameworks = st.multiselect(
             "Select Framework(s) to Display:", available_frameworks, default=available_frameworks
         )
-
         max_algorithms = len(df_metrics)
         top_n = st.number_input(
             f"Select Number of Top Algorithms (Max: {max_algorithms}):",
             min_value=1, max_value=max_algorithms, value=max_algorithms, step=1
         )
-
         df_filtered = df_metrics[df_metrics["Algorithm"].str.startswith(tuple(selected_frameworks))]
         df_filtered = df_filtered.sort_values(by="Accuracy", ascending=False).head(top_n)
-
-        if "feature_importance" in df_filtered.columns:
-            df_filtered = df_filtered.drop(columns=["feature_importance"])
-        if "hyperparameters" in df_filtered.columns:
-            df_filtered = df_filtered.drop(columns=["hyperparameters"])
-
+        # Combine framework and algorithm name to create a unique identifier
+        df_filtered["Framework"] = df_filtered["Algorithm"].apply(lambda x: x.split("_")[0])
+        # Add a new "Color" column based on the algorithm
+        df_filtered["Color"] = df_filtered["Algorithm"].apply(lambda x: color_map.get(x, "white"))
         selected_metric = st.selectbox(
             "Select which single metric to display:",
             ["Accuracy", "F1 Score", "CO2 Emission"]
         )
-
-        columns_to_keep = ["Algorithm", selected_metric]
+        columns_to_keep = ["Color", "Algorithm", selected_metric]  # Move Color to the left
         df_filtered = df_filtered[columns_to_keep]
-
-        st.dataframe(df_filtered, hide_index=True)
-
-    # Algorithm Performance Section (Bar Chart)
+        # Function to color the 'Color' column without displaying the text
+        def color_cells(val):
+            color = val
+            return f"background-color: {color}; color: {color}; width: 10px;"  # Ensure the text is hidden and set width
+        # Apply the color to the Color column using style
+        styled_df = df_filtered.style.map(color_cells, subset=["Color"])
+        st.markdown("""
+            <style>
+                .dataframe tbody td:nth-child(1) {
+                    width: 30px !important; /* Adjust width of Color column */
+                    text-align: center;
+                }
+                .dataframe thead th:nth-child(1) {
+                    width: 30px !important; /* Adjust width of Color column header */
+                    text-align: center;
+                }
+                .dataframe tbody td {
+                    padding: 8px;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+        # Display the styled table using st.dataframe with index=False to hide the index
+        st.dataframe(styled_df, use_container_width=False, hide_index=True)
     st.subheader("Algorithm Performance")
-
     if df_metrics is not None and not df_metrics.empty:
         available_frameworks = list(set(algo.split("_")[0] for algo in df_metrics["Algorithm"]))
         selected_frameworks = st.multiselect(
             "Select Framework(s) to Display:", available_frameworks, default=available_frameworks,
             key="framework_selection_performance"
         )
-
         metric_to_plot = st.selectbox("Select Metric to Visualize", valid_metrics, index=0, key="bar_metric")
         max_algorithms = len(df_metrics)
         top_n = st.number_input(
             f"Select Number of Top Algorithms (Max: {max_algorithms}):",
             min_value=1, max_value=max_algorithms, value=max_algorithms, step=1, key="top_n_performance"
         )
-
         df_filtered = df_metrics[df_metrics["Algorithm"].str.startswith(tuple(selected_frameworks))]
         df_filtered = df_filtered.sort_values(by=metric_to_plot, ascending=False).head(top_n)
         df_filtered["Framework"] = df_filtered["Algorithm"].apply(lambda x: x.split("_")[0])
-
         bar_fig = px.bar(
             df_filtered,
             x="Algorithm",
@@ -411,43 +489,57 @@ if st.session_state.get("show_automl_results", False):
                         ),
                     ),
                 )
-
         st.plotly_chart(bar_fig)
-
     # Performance Trends Section (Scatter Plot)
     st.subheader("Performance Trends")
+    if st.session_state.get("show_automl_results", False):
+        valid_metrics = st.session_state.valid_metrics if st.session_state.valid_metrics else ["No Metrics Available"]
 
-    if valid_metrics and valid_metrics != ["No Metrics Available"]:
-        selected_frameworks_scatter = st.multiselect(
-            "Select Framework(s) for Scatter Plot:", available_frameworks, default=available_frameworks,
-            key="scatter_framework"
-        )
-
-        x_axis = st.selectbox("Select X-Axis", valid_metrics, index=0, key="scatter_x")
-        y_axis = st.selectbox("Select Y-Axis", valid_metrics, index=1, key="scatter_y")
-
-        df_scatter_filtered = df_metrics[df_metrics["Algorithm"].str.startswith(tuple(selected_frameworks_scatter))]
-        if "Framework" not in df_scatter_filtered.columns:
-            df_scatter_filtered["Framework"] = df_scatter_filtered["Algorithm"].apply(lambda x: x.split("_")[0])
-
-        if not df_scatter_filtered.empty:
-            bubble_metric = st.selectbox(
-                "Select Metric for Bubble Size:", valid_metrics, index=valid_metrics.index("CO2 Emission"),
-                key="bubble_size"
+        if valid_metrics and valid_metrics != ["No Metrics Available"]:
+            selected_frameworks_scatter = st.multiselect(
+                "Select Framework(s) for Scatter Plot:", available_frameworks, default=available_frameworks,
+                key="scatter_framework"
             )
+            x_axis = st.selectbox("Select X-Axis", valid_metrics, index=0, key="scatter_x")
+            y_axis = st.selectbox("Select Y-Axis", valid_metrics, index=1, key="scatter_y")
 
-            scatter_fig = px.scatter(
-                df_scatter_filtered,
-                x=x_axis,
-                y=y_axis,
-                color="Framework",
-                size=bubble_metric,
-                hover_name="Algorithm",
-                hover_data=["Accuracy", "F1 Score", "CO2 Emission"],
-                title=f"{y_axis} vs {x_axis} by Framework",
-                size_max=12
-            )
-            scatter_fig.update_layout(
+            df_scatter_filtered = df_metrics[df_metrics["Algorithm"].str.startswith(tuple(selected_frameworks_scatter))]
+            if "Framework" not in df_scatter_filtered.columns:
+                df_scatter_filtered["Framework"] = df_scatter_filtered["Algorithm"].apply(lambda x: x.split("_")[0])
+            if not df_scatter_filtered.empty:
+                bubble_metric = st.selectbox(
+                    "Select Metric for Bubble Size:", valid_metrics, index=valid_metrics.index("CO2 Emission"),
+                    key="bubble_size"
+                )
+                # Map Algorithm to color using the color_map
+                df_scatter_filtered["Color"] = df_scatter_filtered["Algorithm"].apply(lambda x: color_map.get(x, "white"))
+                # Create the scatter plot with unique color for each algorithm
+                scatter_fig = px.scatter(
+                    df_scatter_filtered,
+                    x=x_axis,
+                    y=y_axis,
+                    color="Algorithm",  # Use the Algorithm column for color
+                    color_discrete_map=color_map,  # Apply custom color map
+                    size=bubble_metric,
+                    hover_name="Algorithm",
+                    hover_data=["Accuracy", "F1 Score", "CO2 Emission"],
+                    title=f"{y_axis} vs {x_axis} by Algorithm",
+                    size_max=12,
+                    template="plotly_white"  # Use clean background
+                )
+
+                # Remove color scale and ensure that the color map is used correctly
+                scatter_fig.update_layout(
+                    coloraxis_showscale=False,  # Disable any automatic color scale
+                    legend_title="Framework_Algorithm",
+                    legend=dict(
+                        itemsizing="constant",
+                        font=dict(size=13, color="black"),
+                        traceorder="normal"
+                    ),
+                )
+                # Customizing plot layout
+                scatter_fig.update_layout(
                     xaxis=dict(
                         title=dict(font=dict(size=14, color="black", family="Arial Black")),
                         tickfont=dict(size=15, color="black", family="Arial")
@@ -456,24 +548,18 @@ if st.session_state.get("show_automl_results", False):
                         title=dict(font=dict(size=14, color="black", family="Arial Black")),
                         tickfont=dict(size=15, color="black", family="Times New Roman")
                     ),
-                    legend=dict(
-                        font=dict(
-                            size=13,  # Set the font size for the legend
-                            color="black"  # Set the color of the legend text to black
-                        ),
-                    ),
                 )
-            st.plotly_chart(scatter_fig)
+                # Display the performance trend scatter plot
+                st.plotly_chart(scatter_fig)
 
-        else:
-            st.warning("No data available for the selected frameworks.")
-
-# ✅ If no data is available, show a warning
+            else:
+                st.warning("No data available for the selected frameworks.")
+ 
+# If no data is available, show a warning
 if df_metrics is None or (isinstance(df_metrics, pd.DataFrame) and df_metrics.empty):
     st.warning("No data available for visualization. Run AutoML first.")
 elif st.session_state.get("show_pipeline_analysis", False):
     st.subheader("Pipeline Analysis")
-
     # Define pipeline steps per framework-algorithm combo
     pipeline_steps = {
         "FLAML_Random Forest": [
@@ -563,9 +649,7 @@ elif st.session_state.get("show_pipeline_analysis", False):
             "Majority Voting", "Model Evaluation", "Prediction"
         ]
     }
-
     selected_algos = list(st.session_state["automl_results"].keys())
-
     for algo_key in selected_algos:
         st.markdown(f"### {algo_key}")
         steps = pipeline_steps.get(algo_key)
@@ -592,12 +676,11 @@ elif st.session_state.get("show_pipeline_analysis", False):
             st.warning(f"No pipeline steps defined for {algo_key}")
 
 elif st.session_state.get("show_feature_importance", False):
-    # ✅ Ensure Main UI is hidden and Feature Importance is fully displayed
+    #Ensure Main UI is hidden and Feature Importance is fully displayed
     st.subheader(" Feature Importance Analysis")
 
     results = st.session_state.automl_results
     feature_data = []
-
     # Extract feature importance data from results
     for algo, metrics in results.items():
         if "feature_importance" in metrics and metrics["feature_importance"]:
@@ -607,7 +690,6 @@ elif st.session_state.get("show_feature_importance", False):
                     "Feature": feature,
                     "Importance": float(importance)
                 })
-
     if feature_data:
         df_feature_importance = pd.DataFrame(feature_data).sort_values(by="Importance", ascending=False)
 
@@ -617,27 +699,21 @@ elif st.session_state.get("show_feature_importance", False):
             "Select Framework(s) to Display:", available_frameworks, default=available_frameworks,
             key="feature_framework"
         )
-
         # ✅ Add Top N Selection
         max_features = len(df_feature_importance)
         top_n = st.number_input(
             f"Select Number of Top Features (Max: {max_features}):",
             min_value=1, max_value=max_features, value=max_features, step=1, key="top_n_features"
         )
-
         # ✅ Filter Data by Selected Frameworks
         df_filtered = df_feature_importance[
             df_feature_importance["Algorithm"].str.startswith(tuple(selected_frameworks))]
-
         # ✅ Show only Top N most important features
         df_filtered = df_filtered.sort_values(by="Importance", ascending=False).head(top_n)
-
         # ✅ Remove Index Column
         df_filtered = df_filtered.reset_index(drop=True)
-
         # ✅ Display the Filtered Table
         st.dataframe(df_filtered, hide_index=True)
-
         # ✅ Feature Importance Bar Chart
         fig = px.bar(
             df_filtered, x="Feature", y="Importance", color="Algorithm",
@@ -654,11 +730,9 @@ elif st.session_state.get("show_feature_importance", False):
                     )
                 )
         st.plotly_chart(fig, use_container_width=True)
-
     else:
         st.warning("No feature importance data found for the selected models.")
-#################################################################
-# ✅ Comparison View: Show metrics over time budget history
+# Comparison View: Show metrics over time budget history
 elif st.session_state.get("show_comparison", False):
     st.subheader("Metric comparison")
 
@@ -666,26 +740,115 @@ elif st.session_state.get("show_comparison", False):
     if not comparisons:
         st.warning("No time budget comparisons available yet.")
     else:
-        records = []
+        comparison_records = []
         for entry in comparisons:
             tb = entry["time_budget"]
             for algo, metrics in entry["results"].items():
                 if "error" not in metrics:
-                    records.append({
+                    # Construct a unique key by combining algorithm and time budget
+                    time_budget_key = f"{tb}_{algo}"
+                    color_map_time_budget = {
+    "10 seconds_FLAML_RF": "blue",
+    "30 seconds_FLAML_RF": "blue",
+    "60 seconds_FLAML_RF": "blue",
+    "120 seconds_FLAML_RF": "blue",
+    "10 seconds_FLAML_XGBoost": "red",
+    "30 seconds_FLAML_XGBoost": "red",
+    "60 seconds_FLAML_XGBoost": "red",
+    "120 seconds_FLAML_XGBoost": "red",
+    "10 seconds_FLAML_LightGBM": "green",
+    "30 seconds_FLAML_LightGBM": "green",
+    "60 seconds_FLAML_LightGBM": "green",
+    "120 seconds_FLAML_LightGBM": "green",
+    "10 seconds_FLAML_Extra Trees": "yellow",
+    "30 seconds_FLAML_Extra Trees": "yellow",
+    "60 seconds_FLAML_Extra Trees": "yellow",
+    "120 seconds_FLAML_Extra Trees": "yellow",
+    "10 seconds_FLAML_KNN": "purple",
+    "30 seconds_FLAML_KNN": "purple",
+    "60 seconds_FLAML_KNN": "purple",
+    "120 seconds_FLAML_KNN": "purple",
+    "10 seconds_FLAML_Logistic Regression": "orange",
+    "30 seconds_FLAML_Logistic Regression": "orange",
+    "60 seconds_FLAML_Logistic Regression": "orange",
+    "120 seconds_FLAML_Logistic Regression": "orange",
+    "10 seconds_H2O_Naive Bayes": "gray",
+    "30 seconds_H2O_Naive Bayes": "gray",
+    "60 seconds_H2O_Naive Bayes": "gray",
+    "120 seconds_H2O_Naive Bayes": "gray",
+    "10 seconds_H2O_GBM": "black",
+    "30 seconds_H2O_GBM": "black",
+    "60 seconds_H2O_GBM": "black",
+    "120 seconds_H2O_GBM": "black",
+    "10 seconds_H2O_GLM": "pink",
+    "30 seconds_H2O_GLM": "pink",
+    "60 seconds_H2O_GLM": "pink",
+    "120 seconds_H2O_GLM": "pink",
+    "10 seconds_H2O_Distributed RF": "cyan",
+    "30 seconds_H2O_Distributed RF": "cyan",
+    "60 seconds_H2O_Distributed RF": "cyan",
+    "120 seconds_H2O_Distributed RF": "cyan",
+    "10 seconds_H2O_XGBoost": "magenta",
+    "30 seconds_H2O_XGBoost": "magenta",
+    "60 seconds_H2O_XGBoost": "magenta",
+    "120 seconds_H2O_XGBoost": "magenta",
+    "10 seconds_MLJAR_Baseline": "lime",
+    "10 seconds_MLJAR_Decision Tree": "olive",
+    "10 seconds_MLJAR_RF": "teal",
+    "10 seconds_MLJAR_XGBoost": "maroon",
+    "10 seconds_MLJAR_Neural Network": "navy",
+    "10 seconds_MLJAR_Extra Trees": "silver",
+    "10 seconds_MLJAR_LightGBM": "gold",
+    "10 seconds_MLJAR_SVM": "beige",
+    "10 seconds_MLJAR_KNN": "brown",
+    "30 seconds_MLJAR_Baseline": "lime",
+    "30 seconds_MLJAR_Decision Tree": "olive",
+    "30 seconds_MLJAR_RF": "teal",
+    "30 seconds_MLJAR_XGBoost": "maroon",
+    "30 seconds_MLJAR_Neural Network": "navy",
+    "30 seconds_MLJAR_Extra Trees": "silver",
+    "30 seconds_MLJAR_LightGBM": "gold",
+    "30 seconds_MLJAR_SVM": "beige",
+    "30 seconds_MLJAR_KNN": "brown",
+    "60 seconds_MLJAR_Baseline": "lime",
+    "60 seconds_MLJAR_Decision Tree": "olive",
+    "60 seconds_MLJAR_RF": "teal",
+    "60 seconds_MLJAR_XGBoost": "maroon",
+    "60 seconds_MLJAR_Neural Network": "navy",
+    "60 seconds_MLJAR_Extra Trees": "silver",
+    "60 seconds_MLJAR_LightGBM": "gold",
+    "60 seconds_MLJAR_SVM": "beige",
+    "60 seconds_MLJAR_KNN": "brown",
+    "120 seconds_MLJAR_Baseline": "lime",
+    "120 seconds_MLJAR_Decision Tree": "olive",
+    "120 seconds_MLJAR_RF": "teal",
+    "120 seconds_MLJAR_XGBoost": "maroon",
+    "120 seconds_MLJAR_Neural Network": "navy",
+    "120 seconds_MLJAR_Extra Trees": "silver",
+    "120 seconds_MLJAR_LightGBM": "gold",
+    "120 seconds_MLJAR_SVM": "beige",
+    "120 seconds_MLJAR_KNN": "brown",
+
+    
+}
+                    # Get the color based on the time budget and algorithm combination
+                    unique_color = color_map_time_budget.get(time_budget_key, "gray")  # Default color is gray
+
+
+                    comparison_records.append({
                         "Time Budget": tb,
                         "Algorithm": algo,
-                        #"Accuracy": round(metrics.get("accuracy", 0), 4),
-                        #"F1 Score": round(metrics.get("f1_score", 0), 4),
+                        "Color": unique_color,  # Add the color to the record
                         "CO2 Emission": round(metrics.get("CO2 Emission", 0), 4),
                         "Energy Consumption": round(metrics.get("Energy Consumption", 0), 6),
-                         "Cost (µ¢)": round(metrics.get("cost_micro_cents", 0), 4),
+                        "Cost (µ¢)": round(metrics.get("cost_micro_cents", 0), 4),
                     })
 
-        if records:
-            df_comparison = pd.DataFrame(records)
+        if comparison_records:
+            df_comparison = pd.DataFrame(comparison_records)
             st.dataframe(df_comparison)
-                # Refined Energy vs Accuracy plot with connected lines per framework
-            st.subheader(" Multi-Budget Evaluation by time")
+            # Refined Energy vs Accuracy plot with connected lines per framework
+            st.subheader("Evaluation by time")
 
             if not df_comparison.empty:
                 # Extract framework from algorithm name (e.g., FLAML from FLAML_XGBoost)
@@ -693,12 +856,17 @@ elif st.session_state.get("show_comparison", False):
                 df_comparison["Time Label"] = df_comparison["Time Budget"].apply(lambda x: x.split()[0] + "s")
                 df_comparison["Time Budget Value"] = df_comparison["Time Budget"].str.extract(r'(\d+)').astype(int)
                 #df_comparison = df_comparison.sort_values(by=["Framework", "Energy (µWh)", "CO2 Emissions (µg)"])
-                df_comparison = df_comparison.sort_values(by=["Framework", "CO2 Emission", "Energy Consumption"])
+                # df_comparison = df_comparison.sort_values(by=["Framework", "CO2 Emission", "Energy Consumption"])
+                # Ensure the data is sorted by CO2 Emission for each Time Label
+                df_comparison = df_comparison.sort_values(by=["Energy Consumption", "CO2 Emission"])
+                # Create a new column combining Time Budget + Algorithm for unique color mapping
+                df_comparison["Time_Algo"] = df_comparison["Time Budget"] + "_" + df_comparison["Algorithm"]
+
                 fig_line = px.line(
                     df_comparison,
                     x="CO2 Emission",
                     y="Energy Consumption",
-                    color="Time Label",
+                    color="Time_Algo",
                     text="Time Label",
                     hover_name="Algorithm",
                     hover_data={
@@ -708,10 +876,13 @@ elif st.session_state.get("show_comparison", False):
                         "Energy Consumption": True,
                         "Framework": False   },
                     markers=True,  # Ensures points show up with lines
-                    line_group="Framework",
+                    line_group="Time_Algo",
                     log_y=True,
                     title="Energy vs CO2 for Each Framework (log scale)",
-                    labels={"Energy Consumption": "Energy Consumption"}, )
+                    labels={"Energy Consumption": "Energy Consumption"},
+                    color_discrete_map=color_map_time_budget  # 🔥 Correct color mapping
+                     
+                      )
                 #fig_line.update_traces(mode="lines+markers+text", textposition="top center")
                 fig_line.update_traces(
                 mode="lines+markers+text",
@@ -719,25 +890,35 @@ elif st.session_state.get("show_comparison", False):
                 textfont=dict(
                     size=11,
                     family="Arial Black",
-                    color=None  ),
-                marker=dict(
+                    color="black"  ),
+                 marker=dict(
                     size=22,
                     color="white",  # White inner circle
-                    line=dict(width=2, color=None)    )      )
+                     line=dict(width=2),
+                  #  line=dict(width=2, color="black"    #df_comparison["Color"]  # Outline color mapped from color_map
+  )      )
+                # Now update each trace's marker line color to match its assigned trace color.
+                for trace in fig_line.data:
+                    # Each trace's marker.color is automatically assigned by the discrete map.
+                    # We set the outline (line) color to be the same as the trace's color.
+                    # trace.marker.line = dict(width=2, color=trace.marker.color)
+                    trace.marker.line.color = trace.line.color  #  Match border color to line color
+                    trace.marker.line.width = 2  #  Make sure border is visible
+
                 fig_line.update_layout(
                 yaxis=dict(
                     type="log",
                     tickvals=[0.1, 0.3, 1, 3, 10],
-                    showgrid=False,        # ❌ remove grey horizontal grid lines
-                    zeroline=False,        # ❌ remove baseline if any
-                    showline=True,         # ✅ show Y-axis line
+                    showgrid=False,        #  remove grey horizontal grid lines
+                    zeroline=False,        #  remove baseline if any
+                    showline=True,         #  show Y-axis line
                     linecolor='black',     # axis color
                     ticks="outside",
                     tickfont=dict(size=12) ),
                 xaxis=dict(
-                    showgrid=False,        # ❌ remove grey vertical grid lines
+                    showgrid=False,        #  remove grey vertical grid lines
                     zeroline=False,
-                    showline=True,         # ✅ show X-axis line
+                    showline=True,         # show X-axis line
                     linecolor='black',
                     ticks="outside",
                     tickfont=dict(size=12) ),
@@ -746,100 +927,116 @@ elif st.session_state.get("show_comparison", False):
                  # Update x axis and y axis font properties:
                 fig_line.update_layout(
                     xaxis=dict(
-                        title=dict(font=dict(size=14, color="black", family="Arial Black")),
-                        tickfont=dict(size=14, color="black", family="Arial")),
+                        title="CO2 Emission (µg)",
+                         title_font=dict(size=16, color='black', family='Arial', weight='bold'),  # Bold and black title
+                        tickfont=dict(size=16, color='black', weight='bold')  # Bold and black ticks
+                    ),
+                        # title=dict(font=dict(size=14, color="black", family="Arial Black")),
+                        # tickfont=dict(size=14, color="black", family="Arial")),
                     yaxis=dict(
-                        title=dict(font=dict(size=14, color="black", family="Arial Black")),
-                        tickfont=dict(size=14, color="black", family="Times New Roman")) )   
+                        title="Energy Consumption (µWh)",
+                         title_font=dict(size=16, color='black', family='Arial', weight='bold'),  # Bold and black title
+                        tickfont=dict(size=16, color='black', weight='bold')  # Bold and black ticks
+                    ),
+                        # title=dict(font=dict(size=14, color="black", family="Arial Black")),
+                        # tickfont=dict(size=14, color="black", family="Times New Roman")) 
+                        )   
                 st.plotly_chart(fig_line, use_container_width=True)
         else:
             st.warning("No comparison data available to plot.")
-            #####------------------------------------
-        st.subheader("Single-Budget Comparison by Framework")
-    if df_comparison is not None and not df_comparison.empty:
-        # Set X and Y axes to CO2 Emission and Energy Consumption
-        x_axis = "CO2 Emission"
-        y_axis = "Energy Consumption"
+        # Update in the Evaluation by Framework section
+        if st.session_state.get("show_comparison", False):
+            st.subheader("Evaluation by Framework")
+            # Create a dictionary to store best performing algorithms for each framework and time budget
+            best_algorithms_per_time_budget = {}
+            # Loop through the time budget comparisons to find the best performing algorithm for each framework and time budget
+            for entry in st.session_state.get("time_budget_comparisons", []):
+                time_budget = entry["time_budget"]
+                results = entry["results"]
+                # Loop through the results and find the best performing algorithm for each framework and time budget
+                for algo, metrics in results.items():
+                    framework = algo.split("_")[0]
+                    co2_emission = metrics.get("CO2 Emission", float('inf'))
+                    energy_consumption = metrics.get("Energy Consumption", float('inf'))
+                    # If the framework and time budget do not exist in the dictionary, initialize them
+                    if framework not in best_algorithms_per_time_budget:
+                        best_algorithms_per_time_budget[framework] = {}
+                    # If the time budget does not exist for this framework, initialize it
+                    if time_budget not in best_algorithms_per_time_budget[framework]:
+                        best_algorithms_per_time_budget[framework][time_budget] = {"algorithm": algo, 
+                                                                                "CO2 Emission": co2_emission, 
+                                                                                "Energy Consumption": energy_consumption}
+                    # Check if the current algorithm has a better performance for the given time budget
+                    current_best = best_algorithms_per_time_budget[framework][time_budget]
+                    if co2_emission < current_best["CO2 Emission"] and energy_consumption < current_best["Energy Consumption"]:
+                        best_algorithms_per_time_budget[framework][time_budget] = {
+                            "algorithm": algo,
+                            "CO2 Emission": co2_emission,
+                            "Energy Consumption": energy_consumption
+                        }
+            # Prepare the final list of best algorithms to plot
+            best_algo_data = []
+            for framework, time_budgets in best_algorithms_per_time_budget.items():
+                for time_budget, data in time_budgets.items():
+                    best_algo_data.append({
+                        "Framework": framework,
+                        "Algorithm": data["algorithm"],
+                        "CO2 Emission": data["CO2 Emission"],
+                        "Energy Consumption": data["Energy Consumption"],
+                        "Time Budget": time_budget
+                    })
+            # Create a DataFrame with the best performing algorithms per framework and time budget
+            df_best_algos = pd.DataFrame(best_algo_data)
+            # Update the text column to display only "10s"
+            df_best_algos['Time Budget'] = df_best_algos['Time Budget'].apply(lambda x: str(x)[:2] + "s")  # Convert time to "10s"
+            # Plot the best performing algorithms for each time budget
+            # Plot the best performing algorithms for each time budget
+            if not df_best_algos.empty:
+                fig = px.scatter(
+                    df_best_algos,
+                    x="CO2 Emission",
+                    y="Energy Consumption",
+                    color="Framework",
+                    hover_name="Algorithm",
+                    title="Best Performing Algorithms by Framework",
+                    text="Time Budget",  # Show time budget as "10s"
+                    color_discrete_map=color_map_time_budget  # Ensures color map is consistent
+                )
 
-        # Create a scatter plot
-        fig = go.Figure()
-
-        # Define framework colors
-        framework_colors = {
-            "FLAML": "red",
-            "MLJAR": "blue",
-            "H2O": "green",
-        }
-
-        # Loop through each framework
-        for framework in df_comparison["Framework"].unique():
-            df_framework = df_comparison[df_comparison["Framework"] == framework]
-            framework_color = framework_colors.get(framework, "gray")  # Default color
-
-            # Loop through each algorithm in the framework and add the scatter plot for each algorithm
-            for algorithm in df_framework["Algorithm"].unique():
-                df_algo = df_framework[df_framework["Algorithm"] == algorithm]
-
-                # Plot each algorithm individually
-                fig.add_trace(go.Scatter(
-                    x=df_algo[x_axis], 
-                    y=df_algo[y_axis],
-                    mode="markers+lines",
-                    line=dict(color=framework_color),  # Line color for the framework
-                    marker=dict(size=10, color=framework_color, line=dict(width=2, color='black')),  # Circle properties
-                    name=algorithm,  # Name each algorithm for plotting
-                    text=df_algo["Time Budget"],  # Time budget for hover
-                    hoverinfo='text',  # Show time budget on hover
-                    showlegend=False  # Hide individual algorithm names in the legend
-                ))
-
-            # Add a dummy trace for the framework to show in the legend (only once per framework)
-            fig.add_trace(go.Scatter(
-                x=[None],  # Empty x-data to avoid plotting
-                y=[None],  # Empty y-data to avoid plotting
-                mode="markers",  # Just show a marker in the legend
-                marker=dict(size=10, color=framework_color, line=dict(width=2, color='black')),  # Circle properties
-                name=framework,  # Name for the framework to show in the legend
-                showlegend=True  # Only show the framework name in the legend
-            ))
-
-        # Update the layout with labels and title
-        fig.update_layout(
-            xaxis_title=x_axis,
-            yaxis_title=y_axis,
-            template='plotly_white',
-            xaxis_title_font=dict(
-                size=16,  # Increase the font size for the x-axis title
-                color="black",  # Set the color to black
-                family="Arial Black",  # Set the font to Arial Black for better visibility
-            ),
-            yaxis_title_font=dict(
-                size=16,  # Increase the font size for the y-axis title
-                color="black",  # Set the color to black
-                family="Arial Black",  # Set the font to Arial Black for better visibility
-            ),
-            xaxis=dict(
-                showgrid=False,  # Remove the grey grid lines
-                showline=True,  # Show the X-axis line
-                linecolor='black',  # Set the color of the axis line to black
-                ticks="outside",  # Move the ticks outside the plot area
-                tickfont=dict(size=15, color="black")  # Set tick font size and color
-            ),
-            yaxis=dict(
-                showgrid=False,  # Remove the grey grid lines
-                showline=True,  # Show the Y-axis line
-                linecolor='black',  # Set the color of the axis line to black
-                ticks="outside",  # Move the ticks outside the plot area
-                tickfont=dict(size=15, color="black")  # Set tick font size and color
-            )
+                # Update the layout to format the time budget text
+                fig.update_traces(
+                    texttemplate="%{text}",  # Show the text (time budget) only
+                    textposition="middle center",  # Center the text inside the circles
+                    textfont=dict(
+                        family="Arial", 
+                        size=14, 
+                        color="black",  # Make the text color black
+                        weight="bold"  # Make the text bold
+                    ),
+                    marker=dict(
+            sizemode='diameter',  # Keep the circle size fixed
+            size=30  # Fixed circle size (adjust as needed)
         )
+                )
+                # Customize axis titles and font sizes (make axis text and numbers black and bold)
+                fig.update_layout(
+                    xaxis=dict(
+                        title="CO2 Emission (µg)",
+                        title_font=dict(size=16, color='black', family='Arial', weight='bold'),  # Bold and black title
+                        tickfont=dict(size=16, color='black', weight='bold')  # Bold and black ticks
+                    ),
+                    yaxis=dict(
+                        title="Energy Consumption (µWh)",
+                        title_font=dict(size=16, color='black', family='Arial', weight='bold'),  # Bold and black title
+                        tickfont=dict(size=16, color='black', weight='bold')  # Bold and black ticks
+                    ),
+                    title=dict(font=dict(size=18)),
+                )
 
-        # Display the figure
-        st.plotly_chart(fig)
-    else:
-        st.warning("No comparison data available for plotting.")        
-
-            #____________________________      
+                # Display the plot
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.warning("No best algorithms to display. Please ensure results are available for the selected frameworks and time budgets.") 
 elif st.session_state.get("show_hyperimpact_analysis", False):
     st.subheader("Hyperparameter Impact Analysis")
     # Ask the user to select a performance metric for analysis.
@@ -855,7 +1052,6 @@ elif st.session_state.get("show_hyperimpact_analysis", False):
             "Select an algorithm for hyperparameter impact analysis:",
             options=available_algorithms
         )
-        
         # Retrieve the hyperparameters and the selected metric value for the chosen algorithm.
         algo_result = st.session_state["automl_results"].get(selected_algo, {})
         hyperparams = algo_result.get("hyperparameters", {})
@@ -883,7 +1079,6 @@ elif st.session_state.get("show_hyperimpact_analysis", False):
                         "Impact": impact_score
                     })
                 df_impact = pd.DataFrame(impact_data)
-                
                 # Create a grouped bar chart using Plotly Express.
                 fig = px.bar(
                     df_impact,
@@ -903,7 +1098,7 @@ elif st.session_state.get("show_hyperimpact_analysis", False):
                         title=dict(font=dict(size=14, color="black", family="Arial black")),
                         tickfont=dict(size=16, color="black", family="Times New Roman"), 
                          title_text=f"Impact ({selected_metric})"
-                    )
-                    
+                    )    
                 )
                 st.plotly_chart(fig, use_container_width=True)
+

@@ -1,3 +1,4 @@
+
 from catboost import CatBoostClassifier
 from flaml.default import XGBClassifier, LGBMClassifier
 from flask import Flask, request, jsonify
@@ -37,31 +38,31 @@ app = Flask(__name__)
 # Full algorithm mapping
 framework_algorithms = {
     "FLAML": {
-        "Random Forest": RandomForestClassifier(n_estimators=100, warm_start=True, random_state=42),
+        "RF": RandomForestClassifier(n_estimators=100, warm_start=True, random_state=42),
         "Extra Trees": ExtraTreesClassifier(n_estimators=100,warm_start=True, random_state=42),
         "Logistic Regression": LogisticRegression(random_state=42),
         "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric="mlogloss", random_state=42),
         #"CatBoost": CatBoostClassifier(iterations=500, learning_rate=0.03, depth=6, verbose=0),
         "LightGBM": LGBMClassifier(random_state=42),
-        "K-Nearest Neighbors": KNeighborsClassifier(),
+        "KNN": KNeighborsClassifier(),
     },
     "H2O": {
         "GLM": LogisticRegression(random_state=42),
         "GBM": LGBMClassifier(random_state=42),
         "Naive Bayes": GaussianNB(),
-        "Distributed Random Forest": RandomForestClassifier(n_estimators=200,warm_start=True, random_state=42),
+        "Distributed RF": RandomForestClassifier(n_estimators=200,warm_start=True, random_state=42),
         "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric="mlogloss", random_state=42),
     },
     "MLJAR": {
         "Baseline": LogisticRegression(random_state=42),
         "Decision Tree": ExtraTreesClassifier(max_depth=3, random_state=42),
-        "Random Forest": RandomForestClassifier(n_estimators=100, warm_start=True, random_state=42),
+        "RF": RandomForestClassifier(n_estimators=100, warm_start=True, random_state=42),
         "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric="mlogloss", random_state=42),
         "Neural Network": SVC(kernel="linear", probability=True, random_state=42),
         "Extra Trees": ExtraTreesClassifier(n_estimators=100,warm_start=True, random_state=42),
         "LightGBM": LGBMClassifier(random_state=42),
-        "Support Vector Machines": SVC(kernel="rbf", probability=True, random_state=42),
-        "K-Nearest Neighbors": SVC(kernel="linear", probability=True, random_state=42),
+        "SVM": SVC(kernel="rbf", probability=True, random_state=42),
+        "KNN": SVC(kernel="linear", probability=True, random_state=42),
     },
 }
 
@@ -231,3 +232,4 @@ def evaluate_model(model, X, y, time_budget):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
