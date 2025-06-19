@@ -115,6 +115,8 @@ Returns per‑algorithm metrics, carbon/energy figures, hyper‑params & feature
 ## 5. Package Versions
 
 Below are the tested versions.  Newer releases usually work, but lock these for reproducibility.
+![image](https://github.com/user-attachments/assets/fceed1dc-ef9a-467f-b0f2-465051cbd072)
+
 
 
 Python              3.10+
@@ -158,10 +160,10 @@ seaborn             0.13.2
 **Symptom**                                                                 **Fix**      
 
 
--** ModuleNotFoundError:   **                   Re‑run pip install -r requirements.txt inside the activated venv
+-**ModuleNotFoundError:**                   Re‑run pip install -r requirements.txt inside the activated venv
 
 
-- **Tracker raises No GPU found:   **          Ignore – CodeCarbon falls back to CPU measurement
+- **Tracker raises No GPU found:**          Ignore – CodeCarbon falls back to CPU measurement
   
 
 - **Streamlit shows blank page:**              Refresh browser; check that backend.py is still running
