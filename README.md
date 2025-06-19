@@ -33,7 +33,7 @@ A lightweight, **energy‑aware AutoML** toolkit.  A Flask back‑end trains mul
 
 - **REST API** (/run_automl) for programmatic access
 
-#3 2. Project Structure
+# 2. Project Structure
 ├── backend.py      # Flask API – training & carbon tracking
 ├── frontend.py     # Main Streamlit interface (rich UI)
 ├── app.py          # Minimal Streamlit demo (optional)
