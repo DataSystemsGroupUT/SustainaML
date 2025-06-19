@@ -44,6 +44,7 @@ A lightweight, **energy‑aware AutoML** toolkit.  A Flask back‑end trains mul
 └── README.md       # You are here
 
 **Tip :** frontend.py and app.py do not share state; keep one running at a time.
+
 ## 3. Quick Start
 **1 · Clone & create env**
 _git clone <your‑repo‑url> sustainaml-automl
