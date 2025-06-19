@@ -81,7 +81,7 @@ Visit the URL Streamlit prints (default http://localhost:8501).  Upload a CSV wh
 
 ## 4. API Reference
 
-_POST /run_automl
+POST /run_automl
 
 {
 
@@ -109,7 +109,7 @@ _POST /run_automl
   
   "data": "<pandas.DataFrame>.to_json()"   // last col = y
   
-}_
+}
 
 Returns per‑algorithm metrics, carbon/energy figures, hyper‑params & feature importances.
 
@@ -118,9 +118,9 @@ Returns per‑algorithm metrics, carbon/energy figures, hyper‑params & feature
 Below are the tested versions.  Newer releases usually work, but lock these for reproducibility.
 
 
-_Python              3.10+
+Python              3.10+
 
-# Core
+**#Core**
 
 flask               3.0.2
 
@@ -128,7 +128,7 @@ streamlit           1.34.0
 
 requests            2.32.2
 
-# Data / ML
+**#Data / ML**
 
 pandas              2.2.2
 
@@ -146,17 +146,17 @@ catboost            1.2.3
 
 codecarbon          2.3.0
 
-# Visualisation
+**#Visualisation**b
 
 plotly              5.21.0
 
 matplotlib          3.9.0
 
-seaborn             0.13.2_
+seaborn             0.13.2
 
 ## 6.  Troubleshooting
 
-**Symptom**                                                                 **Fix  **      
+**Symptom**                                                                 **Fix**      
 
 
 - ModuleNotFoundError                     Re‑run pip install -r requirements.txt inside the activated venv
