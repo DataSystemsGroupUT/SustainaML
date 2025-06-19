@@ -49,33 +49,32 @@ A lightweight, **energy‑aware AutoML** toolkit.  A Flask back‑end trains mul
 
 **1 · Clone & create env**
 
-_git clone <your‑repo‑url> sustainaml-automl
+git clone <your‑repo‑url> sustainaml-automl
 
 cd sustainaml-automl
 
 python -m venv venv
 
 source venv/bin/activate   # Windows: venv\Scripts\activate_
-
 **2 · Install requirements**
 
-_pip install -r requirements.txt
+pip install -r requirements.txt
 
 #OR – for the exact versions we tested
 
-#pip install -r requirements_locked.txt_
+#pip install -r requirements_locked.txt
 
 **3 · Run the stack**
 
 In two terminals or two split panes 
 
-_#Terminal ① – REST back‑end
+#Terminal 1 – REST back‑end
 
 python backend.py
 
-#Terminal ② – UI front‑end
+#Terminal 2 – UI front‑end
 
-streamlit run frontend.py   # or streamlit run app.py_
+streamlit run frontend.py   # or streamlit run app.py
 
 Visit the URL Streamlit prints (default http://localhost:8501).  Upload a CSV where **the last column is the target label.**
 
@@ -159,13 +158,13 @@ seaborn             0.13.2
 **Symptom**                                                                 **Fix**      
 
 
-- ModuleNotFoundError:                      Re‑run pip install -r requirements.txt inside the activated venv
+-** ModuleNotFoundError:   **                   Re‑run pip install -r requirements.txt inside the activated venv
 
 
-- Tracker raises No GPU found:             Ignore – CodeCarbon falls back to CPU measurement
+- **Tracker raises No GPU found:   **          Ignore – CodeCarbon falls back to CPU measurement
   
 
-- Streamlit shows blank page:              Refresh browser; check that backend.py is still running
+- **Streamlit shows blank page:**              Refresh browser; check that backend.py is still running
   
 ## 7. Acknowledgements
 
