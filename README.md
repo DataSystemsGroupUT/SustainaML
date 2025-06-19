@@ -114,46 +114,9 @@ Returns per‑algorithm metrics, carbon/energy figures, hyper‑params & feature
 
 ## 5. Package Versions
 
-Below are the tested versions.  Newer releases usually work, but lock these for reproducibility.
+
 ![image](https://github.com/user-attachments/assets/fceed1dc-ef9a-467f-b0f2-465051cbd072)
 
-
-
-Python              3.10+
-
-**#Core**
-
-flask               3.0.2
-
-streamlit           1.34.0
-
-requests            2.32.2
-
-**#Data / ML**
-
-pandas              2.2.2
-
-numpy               1.26.4
-
-scikit‑learn        1.5.0
-
-flaml               2.1.5
-
-xgboost             2.0.5
-
-lightgbm            4.3.0
-
-catboost            1.2.3
-
-codecarbon          2.3.0
-
-**#Visualisation**b
-
-plotly              5.21.0
-
-matplotlib          3.9.0
-
-seaborn             0.13.2
 
 ## 6.  Troubleshooting
 
