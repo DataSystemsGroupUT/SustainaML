@@ -1,4 +1,4 @@
-## SustainaML AutoML
+### SustainaML AutoML
 
 A lightweight, **energy‑aware AutoML** toolkit.  A Flask back‑end trains multiple ML frameworks while tracking CO₂/energy with , and a Streamlit front‑end lets you explore results, feature importance, and hyper‑parameter impact — all in your browser.
 
