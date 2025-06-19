@@ -1,4 +1,4 @@
-### SustainaML AutoML
+# SustainaML AutoML
 
 A lightweight, **energy‑aware AutoML** toolkit.  A Flask back‑end trains multiple ML frameworks while tracking CO₂/energy with , and a Streamlit front‑end lets you explore results, feature importance, and hyper‑parameter impact — all in your browser.
 
@@ -20,7 +20,7 @@ A lightweight, **energy‑aware AutoML** toolkit.  A Flask back‑end trains mul
 
 
 
-# 1. Features
+## 1. Features
 
 - **AutoML search across frameworks** — FLAML, “H2O”, MLJAR
 
@@ -33,13 +33,13 @@ A lightweight, **energy‑aware AutoML** toolkit.  A Flask back‑end trains mul
 
 - **REST API** (/run_automl) for programmatic access
 
-# 2. Project Structure
+#3 2. Project Structure
 ├── backend.py      # Flask API – training & carbon tracking
 ├── frontend.py     # Main Streamlit interface (rich UI)
 ├── app.py          # Minimal Streamlit demo (optional)
 └── README.md       # You are here
 **Tip :** frontend.py and app.py do not share state; keep one running at a time.
-# 3. Quick Start
+## 3. Quick Start
 **1 · Clone & create env**
 _git clone <your‑repo‑url> sustainaml-automl
 cd sustainaml-automl
@@ -57,7 +57,7 @@ python backend.py
 #Terminal ② – UI front‑end
 streamlit run frontend.py   # or streamlit run app.py_
 Visit the URL Streamlit prints (default http://localhost:8501).  Upload a CSV where **the last column is the target label.**
-# 4. API Reference
+## 4. API Reference
 _POST /run_automl
 {
   "frameworks": ["FLAML", "H2O", "MLJAR"],
@@ -74,7 +74,7 @@ _POST /run_automl
   "data": "<pandas.DataFrame>.to_json()"   // last col = y
 }_
 Returns per‑algorithm metrics, carbon/energy figures, hyper‑params & feature importances.
-# 5. Package Versions
+## 5. Package Versions
 Below are the tested versions.  Newer releases usually work, but lock these for reproducibility.
 
 _Python              3.10+
@@ -98,7 +98,7 @@ codecarbon          2.3.0
 plotly              5.21.0
 matplotlib          3.9.0
 seaborn             0.13.2_
-# 6.  Troubleshooting
+## 6.  Troubleshooting
 **Symptom**                                                                 **Fix  **      
 
 - ModuleNotFoundError                     Re‑run pip install -r requirements.txt inside the activated venv
@@ -107,5 +107,5 @@ seaborn             0.13.2_
 
 - Streamlit shows blank page             Refresh browser; check that backend.py is still running
 - 
-# 7. Acknowledgements
+## 7. Acknowledgements
 CodeCarbon Library for carbon estimation  & the open‑source community • 🌱
