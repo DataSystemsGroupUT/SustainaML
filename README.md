@@ -159,14 +159,14 @@ seaborn             0.13.2
 **Symptom**                                                                 **Fix**      
 
 
-- ModuleNotFoundError                     Re‑run pip install -r requirements.txt inside the activated venv
+- ModuleNotFoundError:                      Re‑run pip install -r requirements.txt inside the activated venv
 
 
-- Tracker raises No GPU found             Ignore – CodeCarbon falls back to CPU measurement
+- Tracker raises No GPU found:             Ignore – CodeCarbon falls back to CPU measurement
   
 
-- Streamlit shows blank page             Refresh browser; check that backend.py is still running
-- 
+- Streamlit shows blank page:              Refresh browser; check that backend.py is still running
+  
 ## 7. Acknowledgements
 
 CodeCarbon Library for carbon estimation  & the open‑source community • 🌱
